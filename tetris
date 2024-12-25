@@ -1,0 +1,131 @@
+#include <iostream>
+#include <windows.h>
+#include <conio.h>
+#include <cstdlib>
+
+using namespace std;
+
+bool gameover;
+const int width = 10;
+const int height = 10;
+int currentX, currentY;
+int score = 0;
+int i, j;
+bool blocksOnFloor[width][height] = { false }; 
+
+void setting() {
+  gameover = false;
+  currentX = rand() % width; 
+  currentY = 0; 
+}
+
+void image() {
+  system("cls");
+  for (int i = 0; i < width + 2; i++) {
+    cout << "+";
+  }
+  cout << endl;
+
+  for (i = 0; i < height; i++) { 
+    for (j = 0; j < width; j++) {
+      if (i == currentY && j == currentX) {
+        cout << "#"; 
+      }
+      else if (blocksOnFloor[j][i]) {
+        cout << "#"; 
+      }
+      else {
+        cout << " ";
+      }
+      if (j == width - 1) {
+        cout << "+";
+      }
+    }
+    cout << endl;
+  }
+
+  for (int i = 0; i < width + 2; i++) {
+    cout << "+";
+  }
+  cout << endl;
+  cout << "Game score: " << score << endl; 
+}
+
+void clearFullLines() {
+  for (int i = 0; i < height; i++) {
+    bool fullLine = true;
+
+    for (j = 0; j < width; j++) {
+      if (!blocksOnFloor[j][i]) {
+        fullLine = false;
+        break;
+      }
+    }
+
+    if (fullLine) {
+      score += 50; 
+      for (int k = i; k > 0; k--) {
+        for (j = 0; j < width; j++) {
+          blocksOnFloor[j][k] = blocksOnFloor[j][k - 1];
+        }
+      }
+      for (j = 0; j < width; j++) {
+        blocksOnFloor[j][0] = false;
+      }
+      i--; 
+    }
+  }
+}
+
+void fall() {
+  if (blocksOnFloor[currentX][0]) {
+    gameover = true;
+    return; 
+  }
+
+  if (currentY < height - 1 && !blocksOnFloor[currentX][currentY + 1]) {
+    currentY++;
+  }
+  else {
+    blocksOnFloor[currentX][currentY] = true;
+
+    if (currentY == 0) {
+      gameover = true; 
+      return; 
+    }
+
+    clearFullLines(); 
+    currentY = 0; 
+    currentX = rand() % width; 
+  }
+}
+
+void controls() {
+  if (_kbhit()) {
+    switch (_getch()) {
+    case 'a':
+      if (currentX > 0) currentX--; 
+      break;
+    case 'd':
+      if (currentX < width - 1) currentX++; 
+      break;
+    }
+  }
+}
+
+int main() {
+  setting();
+
+  while (!gameover) {
+    image();
+    Sleep(100);
+    fall();
+    controls();
+  }
+
+  system("cls");
+  cout << "You lose..." << endl;
+  cout << "Score: " << score << endl;
+
+  return 0;
+}
